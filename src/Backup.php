@@ -7,27 +7,27 @@ use Exception;
 
 class Backup {
     /**
-     * @var string Name of the backup
+     * @var string Backup name
      */
     protected $name;
 
     /**
-     * @var Repository The repository to backup
+     * @var Repository Repository
      */
     protected $repository;
 
     /**
-     * @var Driver The driver to manager backup
+     * @var Driver Driver
      */
     protected $driver;
 
     /**
-     * @var integer The number of backup iteration
+     * @var integer Number of backup iteration
      */
     protected $number_iteration = 7;
 
     /**
-     * @param string $name The name of the backup
+     * @param string $name Backup name
      * @param \Psr\Log\LoggerInterface $logger Logger
      * @throws Exception If name is empty
      */
@@ -41,7 +41,7 @@ class Backup {
     }
 
     /**
-     * @param Repository $repository The repository to backup
+     * @param Repository $repository Repository
      * @throws Exception If repository is empty
      */
     public function setRepository(Repository $repository)
@@ -53,7 +53,7 @@ class Backup {
     }
 
     /**
-     * @param Driver $driver The driver to manager backup
+     * @param Driver $driver Driver
      * @throws Exception If repository is empty
      */
     public function setDriver(Driver $driver)
@@ -65,7 +65,7 @@ class Backup {
     }
 
     /**
-     * @param integer $number_iteration The number of backup iteration
+     * @param integer $number_iteration Number of backup iteration
      * @throws Exception If number is invalid
      */
     public function setNumberIteration($number_iteration)
@@ -77,7 +77,7 @@ class Backup {
     }
 
     /**
-     * @return string Path of the repository archive
+     * @return string Path of repository archive
      */
     protected function getArchive()
     {

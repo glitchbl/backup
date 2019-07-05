@@ -23,7 +23,7 @@ class FsDriver extends Driver {
     }
     /**
      * @param string $file File to save
-     * @param string $backup_name File name of the backup
+     * @param string $backup_name File Backup name
      */
     protected function saveFile($file, $backup_name)
     {

@@ -7,7 +7,7 @@ use Exception;
 
 abstract class Driver {
     /**
-     * @var string Name of the backup
+     * @var string Backup name
      */
     protected $name;
 
@@ -22,12 +22,12 @@ abstract class Driver {
     private $iterations = null;
 
     /**
-     * @param string $name Name of the backup
+     * @param string $name Backup name
      * @throws Exception If name is not valid
      */
     public function setName($name)
     {
-        $pattern = '/[-_a-zA-Z0-9]+(\.[-_a-zA-Z0-9]+)*/';
+        $pattern = '/^[-_a-zA-Z0-9]+(\.[-_a-zA-Z0-9]+)*$/';
         if (!preg_match($pattern, $name))
             throw new Exception("Name '{$name}' is not valid to pattern {$pattern}");
         $this->name = $name;
@@ -47,7 +47,7 @@ abstract class Driver {
     protected function getPattern()
     {
         $name = str_replace('.', '\.', $this->name);
-        return "/^{$name}\.bak(\d+)$/";
+        return "/{$name}\.bak(\d+)$/";
     }
 
     /**
@@ -97,20 +97,6 @@ abstract class Driver {
     }
 
     /**
-     * @return string Get current backup iteration
-     */
-    public function getCurrentIteration()
-    {
-        $iterations = $this->getIterations();
-
-        if (!count($iterations)) {
-            return 0;
-        } else {
-            return end($iterations);
-        }
-    }
-
-    /**
      * @return array Get iterations
      */
     public function getIterations()
@@ -130,8 +116,22 @@ abstract class Driver {
     }
 
     /**
+     * @return string Get current backup iteration
+     */
+    public function getCurrentIteration()
+    {
+        $iterations = $this->getIterations();
+
+        if (!count($iterations)) {
+            return 0;
+        } else {
+            return end($iterations);
+        }
+    }
+
+    /**
      * @param string $file File to save
-     * @param string $backup_name File name of the backup
+     * @param string $backup_name File Backup name
      */
     abstract protected function saveFile($file, $backup_name);
 
