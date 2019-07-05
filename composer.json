@@ -1,0 +1,12 @@
+{
+    "name": "glitchbl/backup",
+    "require": {
+        "glitchbl/ftp-client": "dev-master",
+        "psr/log": "^1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Glitchbl\\Backup\\": "src/"
+        }
+    }
+}
