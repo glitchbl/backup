@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4f6ba6b5edc49a272d25c6312b664400",
+    "content-hash": "38ec0f1ecf06f4333a07d3e7ef8aff57",
     "packages": [
         {
             "name": "glitchbl/ftp-client",
-            "version": "dev-master",
+            "version": "0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/glitchbl/ftp-client.git",
@@ -84,9 +84,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "glitchbl/ftp-client": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
