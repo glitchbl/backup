@@ -27,41 +27,64 @@ class Backup {
     protected $number_iteration = 7;
 
     /**
+     * @var \Psr\Log\LoggerInterface|null Logger
+     */
+    protected $logger = null;
+
+    /**
      * @param string $name Backup name
-     * @param \Psr\Log\LoggerInterface $logger Logger
+     * @param Driver $driver Driver
+     * @param \Psr\Log\LoggerInterface|null $logger Logger
      * @throws Exception If name is empty
      */
-    function __construct($name, LoggerInterface $logger = null)
+    function __construct($name, Driver $driver, LoggerInterface $logger = null)
     {
         if (!$name)
             throw new Exception('Name can not be empty');
 
         $this->name = $name;
         $this->logger = $logger;
-    }
 
-    /**
-     * @param Repository $repository Repository
-     * @throws Exception If repository is empty
-     */
-    public function setRepository(Repository $repository)
-    {
-        if ($repository->isEmpty())
-            throw new Exception('Repository can not be empty');
-
-        $this->repository = $repository;
-    }
-
-    /**
-     * @param Driver $driver Driver
-     * @throws Exception If repository is empty
-     */
-    public function setDriver(Driver $driver)
-    {
         $driver->setName($this->name);
         if ($this->logger !== null)
             $driver->setLogger($this->logger);
         $this->driver = $driver;
+
+        $this->repository = new Repository;
+    }
+
+    /**
+     * @param string $files,... File(s) to add
+     */
+    public function addFile(...$files)
+    {
+        $this->repository->addFile(...$files);
+    }
+
+    /**
+     * @param string $folders,... Folder(s) to add
+     */
+    public function addFolder(...$folders)
+    {
+        $this->repository->addFolder(...$folders);
+    }
+
+    /**
+     * @param string $file File to remove
+     * @throws Exception If file is not present
+     */
+    public function removeFile($file)
+    {
+        $this->repository->removeFile($file);
+    }
+
+    /**
+     * @param string $folder Folder to remove
+     * @throws Exception If folder is not present
+     */
+    public function removeFolder($folder)
+    {
+        $this->repository->removeFolder($folder);
     }
 
     /**
@@ -82,7 +105,7 @@ class Backup {
     protected function getArchive()
     {
         $name = tempnam(sys_get_temp_dir(), $this->name);
-        $this->repository->zip($name);
+        $this->repository->zip($name, $this->logger);
         return $name;
     }
 

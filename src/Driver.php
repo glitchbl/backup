@@ -12,7 +12,7 @@ abstract class Driver {
     protected $name;
 
     /**
-     * @var \Psr\Log\LoggerInterface Logger
+     * @var \Psr\Log\LoggerInterface|null Logger
      */
     protected $logger = null;
 
@@ -20,6 +20,24 @@ abstract class Driver {
      * @var array Iterations
      */
     private $iterations = null;
+
+    /**
+     * @param string $type Log type
+     * @param string $message Log message
+     * @throws Exception
+     */
+    protected function log($type, $message)
+    {
+        if ($this->logger) {
+            $class_name = explode('\\', get_class($this));
+            $class_name = end($class_name);
+            if (method_exists($this->logger, $type)) {
+                call_user_func([$this->logger, $type], "{$class_name}: {$message}");
+            } else {
+                throw new Exception("Logger has not '{$type}' method");
+            }
+        }
+    }
 
     /**
      * @param string $name Backup name
@@ -84,6 +102,7 @@ abstract class Driver {
     {
         $next_name = $this->getNextBackupName();
         $this->saveFile($archive, $next_name);
+        $this->log('info', "Archive '{$archive}' saved as '{$next_name}'");
         $this->iterations[] = $this->getCurrentIteration() + 1;
     }
 
@@ -94,6 +113,7 @@ abstract class Driver {
     {
         $file_name = $this->getBackupName($iteration);
         $this->deleteFile($file_name);
+        $this->log('info', "Archive '{$file_name}' deleted");
     }
 
     /**

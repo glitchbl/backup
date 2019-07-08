@@ -2,6 +2,7 @@
 
 namespace Glitchbl\Backup;
 
+use Psr\Log\LoggerInterface;
 use Exception;
 
 class Repository {
@@ -22,8 +23,9 @@ class Repository {
     {
         foreach ($files as $file) {
             if (is_file($file)) {
-                if (!in_array($file, $this->files))
+                if (!in_array($file, $this->files)) {
                     $this->files[] = $file;
+                }
             } else {
                 throw new Exception("'{$file}' is not a file");
             }
@@ -37,8 +39,9 @@ class Repository {
     {
         foreach ($folders as $folder) {
             if (is_dir($folder)) {
-                if (!in_array($folder, $this->folders))
+                if (!in_array($folder, $this->folders)) {
                     $this->folders[] = $folder;
+                }
             } else {
                 throw new Exception("'{$folder}' is not a directory");
             }
@@ -99,10 +102,11 @@ class Repository {
 
     /**
      * @param string $path Location where to create the zip file
+     * @param \Psr\Log\LoggerInterface|null $logger Logger
      */
-    public function zip($path)
+    public function zip($path, LoggerInterface $logger = null)
     {
-        $zip = new ZipArchive;
+        $zip = new ZipArchive($logger);
         $zip->open($path, ZipArchive::CREATE);
 
         $files_folders = array_merge($this->files, $this->folders);
