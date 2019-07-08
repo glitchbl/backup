@@ -97,10 +97,12 @@ class Backup {
         if ($this->repository === null)
             throw new Exception('Repository is not set');
 
-        $this->driver->begin();
-
         $archive = $this->getArchive();
+
+        $this->driver->begin();
+        
         $this->driver->save($archive);
+
         unlink($archive);
 
         $iterations = $this->driver->getIterations();
