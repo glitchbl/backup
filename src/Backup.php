@@ -2,6 +2,7 @@
 
 namespace Glitchbl\Backup;
 
+use Glitchbl\Backup\Driver\Driver;
 use Psr\Log\LoggerInterface;
 use Exception;
 
@@ -10,14 +11,18 @@ class Backup {
      * @var string Backup name
      */
     protected $name;
-
     /**
-     * @var Repository Repository
+     * @var array $files Backup files
      */
-    protected $repository;
+    protected $files = [];
 
     /**
-     * @var Driver Driver
+     * @var array $files Backup folders
+     */
+    protected $folders = [];
+
+    /**
+     * @var Driver\Driver Driver
      */
     protected $driver;
 
@@ -33,9 +38,9 @@ class Backup {
 
     /**
      * @param string $name Backup name
-     * @param Driver $driver Driver
+     * @param \Glitchbl\Backup\Driver\Driver $driver Driver
      * @param \Psr\Log\LoggerInterface|null $logger Logger
-     * @throws Exception If name is empty
+     * @throws \Exception If name is empty
      */
     function __construct($name, Driver $driver, LoggerInterface $logger = null)
     {
@@ -49,47 +54,11 @@ class Backup {
         if ($this->logger !== null)
             $driver->setLogger($this->logger);
         $this->driver = $driver;
-
-        $this->repository = new Repository;
-    }
-
-    /**
-     * @param string $files,... File(s) to add
-     */
-    public function addFile(...$files)
-    {
-        $this->repository->addFile(...$files);
-    }
-
-    /**
-     * @param string $folders,... Folder(s) to add
-     */
-    public function addFolder(...$folders)
-    {
-        $this->repository->addFolder(...$folders);
-    }
-
-    /**
-     * @param string $file File to remove
-     * @throws Exception If file is not present
-     */
-    public function removeFile($file)
-    {
-        $this->repository->removeFile($file);
-    }
-
-    /**
-     * @param string $folder Folder to remove
-     * @throws Exception If folder is not present
-     */
-    public function removeFolder($folder)
-    {
-        $this->repository->removeFolder($folder);
     }
 
     /**
      * @param integer $number_iteration Number of backup iteration
-     * @throws Exception If number is invalid
+     * @throws \Exception If number is invalid
      */
     public function setNumberIteration($number_iteration)
     {
@@ -100,25 +69,104 @@ class Backup {
     }
 
     /**
+     * @param string $files,... File(s) to add
+     */
+    public function addFile(...$files)
+    {
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                if (!in_array($file, $this->files)) {
+                    $this->files[] = $file;
+                }
+            } else {
+                throw new Exception("'{$file}' is not a file");
+            }
+        }
+    }
+
+    /**
+     * @param string $folders,... Folder(s) to add
+     */
+    public function addFolder(...$folders)
+    {
+        foreach ($folders as $folder) {
+            if (is_dir($folder)) {
+                if (!in_array($folder, $this->folders)) {
+                    $this->folders[] = $folder;
+                }
+            } else {
+                throw new Exception("'{$folder}' is not a folder");
+            }
+        }
+    }
+
+    /**
+     * @param string $file File to remove
+     * @throws \Exception If file is not present
+     */
+    public function removeFile($file)
+    {
+        $key = array_search($file, $this->files);
+        if ($key !== false) {
+            unset($this->files[$key]);
+        } else {
+            throw new Exception("'{$file}' is not present");
+        }
+    }
+
+    /**
+     * @param string $folder Folder to remove
+     * @throws \Exception If folder is not present
+     */
+    public function removeFolder($folder)
+    {
+        $key = array_search($folder, $this->folders);
+        if ($key !== false) {
+            unset($this->folders[$key]);
+        } else {
+            throw new Exception("'{$folder}' is not present");
+        }
+    }
+
+    /**
+     * @return bool True if no files or folders to backup
+     */
+    public function isEmpty()
+    {
+        return count($this->files) + count($this->folders) === 0;
+    }
+
+    /**
      * @return string Path of repository archive
      */
     protected function getArchive()
     {
         $name = tempnam(sys_get_temp_dir(), $this->name);
-        $this->repository->zip($name, $this->logger);
+
+        $zip = new ZipArchive($this->logger);
+        $zip->open($name, ZipArchive::CREATE);
+
+        $files_folders = array_merge($this->files, $this->folders);
+
+        foreach ($files_folders as $file_folder) {
+            $zip->addFileFolder($file_folder);
+        }
+
+        $zip->close();
+
         return $name;
     }
 
     /**
-     * @throws Exception If repository or driver not set
+     * @throws \Exception If no files or folders or driver not set
      */
     public function backup()
     {
         if ($this->driver === null)
             throw new Exception('Driver is not set');
 
-        if ($this->repository === null)
-            throw new Exception('Repository is not set');
+        if ($this->isEmpty())
+            throw new Exception('The backup is empty');
 
         $archive = $this->getArchive();
 

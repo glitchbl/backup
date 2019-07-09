@@ -1,6 +1,6 @@
 <?php
 
-namespace Glitchbl\Backup;
+namespace Glitchbl\Backup\Driver;
 
 use Glitchbl\FtpClient;
 
@@ -11,13 +11,14 @@ class FtpDriver extends Driver {
     protected $ftp_client;
 
     /**
-     * @param string $ftp_server FTP Server
-     * @param string $ftp_login FTP Login
-     * @param string $ftp_password FTP Password
+     * @param string $server FTP Server
+     * @param string $login FTP Login
+     * @param string $password FTP Password
+     * @param integer $port FTP Port
      */
-    function __construct($ftp_server, $ftp_login, $ftp_password, $port = 21)
+    function __construct($server, $login, $password, $port = 21)
     {
-        $this->ftp_client = new FtpClient($ftp_server, $ftp_login, $ftp_password, $port);
+        $this->ftp_client = new FtpClient($server, $login, $password, $port);
     }
 
     public function begin()
@@ -34,15 +35,15 @@ class FtpDriver extends Driver {
 
     /**
      * @param string $file File to save
-     * @param string $backup_name File Backup name
+     * @param string $file_name File name
      */
-    protected function saveFile($file, $backup_name)
+    protected function saveFile($file, $file_name)
     {
-        $this->ftp_client->put($file, $backup_name);
+        $this->ftp_client->put($file, $file_name);
     }
 
     /**
-     * @param string $file File name to delete
+     * @param string $file File to delete
      */
     protected function deleteFile($file)
     {
@@ -50,7 +51,7 @@ class FtpDriver extends Driver {
     }
 
     /**
-     * @return array Get backup files
+     * @return array Get files
      */
     public function getFiles()
     {

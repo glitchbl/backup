@@ -1,11 +1,14 @@
 <?php
 
-namespace Glitchbl\Backup;
+namespace Glitchbl\Backup\Driver;
 
+use Glitchbl\Backup\Traits\HasLogger;
 use Psr\Log\LoggerInterface;
 use Exception;
 
 abstract class Driver {
+    use HasLogger;
+
     /**
      * @var string Backup name
      */
@@ -22,26 +25,8 @@ abstract class Driver {
     private $iterations = null;
 
     /**
-     * @param string $type Log type
-     * @param string $message Log message
-     * @throws Exception
-     */
-    protected function log($type, $message)
-    {
-        if ($this->logger) {
-            $class_name = explode('\\', get_class($this));
-            $class_name = end($class_name);
-            if (method_exists($this->logger, $type)) {
-                call_user_func([$this->logger, $type], "{$class_name}: {$message}");
-            } else {
-                throw new Exception("Logger has not '{$type}' method");
-            }
-        }
-    }
-
-    /**
      * @param string $name Backup name
-     * @throws Exception If name is not valid
+     * @throws \Exception If name is not valid
      */
     public function setName($name)
     {
@@ -136,7 +121,7 @@ abstract class Driver {
     }
 
     /**
-     * @return string Get current backup iteration
+     * @return string Get current iteration
      */
     public function getCurrentIteration()
     {
@@ -151,17 +136,17 @@ abstract class Driver {
 
     /**
      * @param string $file File to save
-     * @param string $backup_name File Backup name
+     * @param string $file_name File name
      */
-    abstract protected function saveFile($file, $backup_name);
+    abstract protected function saveFile($file, $file_name);
 
     /**
-     * @param string $file File name to delete
+     * @param string $file File to delete
      */
     abstract protected function deleteFile($file);
 
     /**
-     * @return array Get backup files
+     * @return array Get files
      */
     abstract protected function getFiles();
 }

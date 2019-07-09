@@ -1,18 +1,18 @@
 <?php
 
-namespace Glitchbl\Backup;
+namespace Glitchbl\Backup\Driver;
 
 use Exception;
 
 class FsDriver extends Driver {
     /**
-     * @var string Directory of backups
+     * @var string Path of backups
      */
     protected $path;
 
     /**
-     * @param string $path Directory of backups
-     * @throws Exception If not a directory
+     * @param string $path Path of backups
+     * @throws \Exception If not a directory
      */
     function __construct($path = '.')
     {
@@ -23,15 +23,15 @@ class FsDriver extends Driver {
     }
     /**
      * @param string $file File to save
-     * @param string $backup_name File Backup name
+     * @param string $file_name File name
      */
-    protected function saveFile($file, $backup_name)
+    protected function saveFile($file, $file_name)
     {
-        copy($file, "{$this->path}/{$backup_name}");
+        copy($file, "{$this->path}/{$file_name}");
     }
 
     /**
-     * @param string $file File name to delete
+     * @param string $file File to delete
      */
     protected function deleteFile($file)
     {
@@ -39,7 +39,7 @@ class FsDriver extends Driver {
     }
 
     /**
-     * @return array Get backup files
+     * @return array Get files
      */
     public function getFiles()
     {
