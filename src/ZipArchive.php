@@ -25,24 +25,23 @@ class ZipArchive extends ZipArchiveBase {
 
     /**
      * @param string $file_folder file or folder to add
+     * @param string $name Name in archive
      * @param string $path Path where to add file or folder
      * @throws \Exception if file or folder does not exists
      */
-    public function addFileFolder($file_folder, $path = '')
+    public function addFileFolder($file_folder, $name, $path = '')
     {
-        $basename = basename($file_folder);
-
         if ($path) {
-            $path = "{$path}/{$basename}";
+            $path = "{$path}/{$name}";
         } else {
-            $path = $basename;
+            $path = $name;
         }
 
         if (is_dir($file_folder)) {
-            $this->addEmptyDir($path);
-            $this->log('info', "Directory '{$path}' created");
+            // $this->addEmptyDir($path);
+            // $this->log('info', "Directory '{$path}' created");
             foreach (glob("{$file_folder}/*") as $_file_folder) {
-                $this->addFileFolder($_file_folder, $path);
+                $this->addFileFolder($_file_folder, basename($_file_folder), $path);
             }
         } elseif (is_file($file_folder)) {
             $this->addFile($file_folder, $path);

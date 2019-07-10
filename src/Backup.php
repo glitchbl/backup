@@ -11,6 +11,7 @@ class Backup {
      * @var string Backup name
      */
     protected $name;
+    
     /**
      * @var array $files Backup files
      */
@@ -69,35 +70,97 @@ class Backup {
     }
 
     /**
-     * @param string $files,... File(s) to add
+     * @param string $string String to check
+     * @param string $pattern RegEx
+     * @throws \Exception If string is not valid for pattern
      */
-    public function addFile(...$files)
+    protected function checkPattern($string, $pattern)
     {
-        foreach ($files as $file) {
-            if (is_file($file)) {
-                if (!in_array($file, $this->files)) {
-                    $this->files[] = $file;
-                }
+       if (!preg_match($pattern, $string))
+            throw new Exception("'{$string}' is not valid for pattern {$pattern}");
+    }
+
+    /**
+     * @param string $name Name to check
+     * @throws \Exception If name is not valid
+     */
+    protected function checkValidName($name)
+    {
+        $pattern = '/^[.]?[\w,\s()@_-]+[\w,\s()@._-]*$/';
+        $this->checkPattern($name, $pattern);
+    }
+
+    /**
+     * @param string $path Path to check
+     * @throws \Exception If path is not valid
+     */
+    protected function checkValidPath($path)
+    {
+        $pattern = '/^[\w,\s()@_-]+(\/[\w,\s()@_-]+)*$/';
+        $this->checkPattern($path, $pattern);
+    }
+
+    /**
+     * @param string $type Type to add (file or folder)
+     * @param string $item File or folder to add
+     * @param string $name New name
+     * @param string $path Path to the file or folder in archive
+     * @throws \Exception If file or folder already added or if type is not valid
+     */
+    protected function add($type, $item, $name, $path)
+    {
+        if ($name !== '') {
+            $this->checkValidName($name);
+        } else {
+            $name = basename($item);
+        }
+
+        if ($path !== '')
+            $this->checkValidPath($path);
+
+        if ($type === 'file') {
+            if (!key_exists($item, $this->files)) {
+                $this->files[$item] = compact('name', 'path');
             } else {
-                throw new Exception("'{$file}' is not a file");
+                throw new Exception("File '{$item}' already added");
             }
+        } elseif ($type === 'folder') {
+            if (!key_exists($item, $this->folders)) {
+                $this->folders[$item] = compact('name', 'path');
+            } else {
+                throw new Exception("Folder '{$item}' already added");
+            }
+        } else {
+            throw new Exception("Type '{$type}' is not valid");
         }
     }
 
     /**
-     * @param string $folders,... Folder(s) to add
+     * @param string $file File to add
+     * @param string $name New name
+     * @param string $path Path to the file in archive
+     * @throws \Exception If not a file
      */
-    public function addFolder(...$folders)
+    public function addFile($file, $name = '', $path = '')
     {
-        foreach ($folders as $folder) {
-            if (is_dir($folder)) {
-                if (!in_array($folder, $this->folders)) {
-                    $this->folders[] = $folder;
-                }
-            } else {
-                throw new Exception("'{$folder}' is not a folder");
-            }
-        }
+        if (!is_file($file))
+            throw new Exception("'{$file}' is not a file");
+
+        $this->add('file', $file, $name, $path);
+    }
+
+    /**
+     * @param string $folder Folder to add
+     * @param string $name New name
+     * @param string $path Path to the folder in archive
+     * @throws \Exception If not a folder
+     */
+    public function addFolder($folder, $name = '', $path = '')
+    {
+        if (!is_dir($folder))
+            throw new Exception("'{$folder}' is not a folder");
+
+        $this->add('folder', $folder, $name, $path);
     }
 
     /**
@@ -106,9 +169,8 @@ class Backup {
      */
     public function removeFile($file)
     {
-        $key = array_search($file, $this->files);
-        if ($key !== false) {
-            unset($this->files[$key]);
+        if (key_exists($file, $this->files)) {
+            unset($this->files[$file]);
         } else {
             throw new Exception("'{$file}' is not present");
         }
@@ -120,9 +182,8 @@ class Backup {
      */
     public function removeFolder($folder)
     {
-        $key = array_search($folder, $this->folders);
-        if ($key !== false) {
-            unset($this->folders[$key]);
+        if (key_exists($folder, $this->folders)) {
+            unset($this->folders[$folder]);
         } else {
             throw new Exception("'{$folder}' is not present");
         }
@@ -146,10 +207,12 @@ class Backup {
         $zip = new ZipArchive($this->logger);
         $zip->open($name, ZipArchive::CREATE);
 
-        $files_folders = array_merge($this->files, $this->folders);
+        foreach ($this->files as $file => $data) {
+            $zip->addFileFolder($file, $data['name'], $data['path']);
+        }
 
-        foreach ($files_folders as $file_folder) {
-            $zip->addFileFolder($file_folder);
+        foreach ($this->folders as $folder => $data) {
+            $zip->addFileFolder($folder, $data['name'], $data['path']);
         }
 
         $zip->close();
