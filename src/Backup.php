@@ -103,11 +103,11 @@ class Backup {
     /**
      * @param string $type Type to add (file or folder)
      * @param string $item File or folder to add
-     * @param string $name New name
      * @param string $path Path to the file or folder in archive
+     * @param string $name New name
      * @throws \Exception If file or folder already added or if type is not valid
      */
-    protected function add($type, $item, $name, $path)
+    protected function add($type, $item, $path, $name)
     {
         if ($name !== '') {
             $this->checkValidName($name);
@@ -137,30 +137,30 @@ class Backup {
 
     /**
      * @param string $file File to add
-     * @param string $name New name
      * @param string $path Path to the file in archive
+     * @param string $name New name
      * @throws \Exception If not a file
      */
-    public function addFile($file, $name = '', $path = '')
+    public function addFile($file, $path = '', $name = '')
     {
         if (!is_file($file))
             throw new Exception("'{$file}' is not a file");
 
-        $this->add('file', $file, $name, $path);
+        $this->add('file', $file, $path, $name);
     }
 
     /**
      * @param string $folder Folder to add
-     * @param string $name New name
      * @param string $path Path to the folder in archive
+     * @param string $name New name
      * @throws \Exception If not a folder
      */
-    public function addFolder($folder, $name = '', $path = '')
+    public function addFolder($folder, $path = '', $name = '')
     {
         if (!is_dir($folder))
             throw new Exception("'{$folder}' is not a folder");
 
-        $this->add('folder', $folder, $name, $path);
+        $this->add('folder', $folder, $path, $name);
     }
 
     /**

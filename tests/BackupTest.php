@@ -176,8 +176,8 @@ final class FtpClientTest extends TestCase {
         $dir = __DIR__;
 
         $backup_fs = new Backup('parent.zip', new FsDriver("{$dir}/backups"));
-        $backup_fs->addFolder("{$dir}/folder1", 'folderB', 'folderA');
-        $backup_fs->addFile("{$dir}/file1", 'file2', 'folderA/folderB/folder2');
+        $backup_fs->addFolder("{$dir}/folder1", 'folderA', 'folderB');
+        $backup_fs->addFile("{$dir}/file1", 'folderA/folderB/folder2', 'file2');
         $backup_fs->backup();
 
         $zip = new ZipArchive;
